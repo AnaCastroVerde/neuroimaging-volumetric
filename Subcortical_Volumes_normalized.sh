@@ -9,7 +9,7 @@ subjs="Case01 Case02 Case03 Case04 Case05" # Change/add your subjects' folder na
 
 ## Set main directory
 
-cd //Users/Ana/volumetryfolder # Write the path name to the location where you want to save your output .csv file
+cd /Users/Ana/volumetryfolder # Write the path name to the location where you want to save your output .csv file
 
 ## Create column names
 
@@ -19,11 +19,11 @@ echo "Case" "VLeft_Thalamus" "VLeft_Caudate" "VLeft_Putamen" "VLeft_Pallidum" "V
 
 for s in ${subjs} ; do
 
-Vscaling=`echo $(cat //Users/Ana/volumetryfolder/sienax/${s}_sienax/report.sienax | awk '/VSCALING/ {print $2}')`;
+Vscaling=`echo $(cat /Users/Ana/volumetryfolder/sienax/${s}_sienax/report.sienax | awk '/VSCALING/ {print $2}')`;
 
 ## Left Hemisphere
 
-tissuevol_L_Thalamus=`$FSLDIR/bin/fslstats //Users/Ana/volumetryfolder/first/${s}/T1_first_all_fast_firstseg.nii.gz -l 9.5 -u 10.5 -V | awk '{print $2}'`; 
+tissuevol_L_Thalamus=`$FSLDIR/bin/fslstats /Users/Ana/volumetryfolder/first/${s}/T1_first_all_fast_firstseg.nii.gz -l 9.5 -u 10.5 -V | awk '{print $2}'`; 
 tissuevol_L_Thalamus_normalized=`echo "$tissuevol_L_Thalamus * $Vscaling" | bc -l`;
 
 tissuevol_L_Caudate=`$FSLDIR/bin/fslstats /Users/Ana/volumetryfolder/first/${s}/T1_first_all_fast_firstseg.nii.gz -l 10.5 -u 11.5 -V | awk '{print $2}'`;
