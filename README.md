@@ -13,10 +13,13 @@ You need to make sure you have on your main directory:
 
 In order to run the bash script type these commmands on Mac terminal:
 
+```
+
 $ cd path_to_script
 
 $ chmod a+x Subcortical_Volumes_normalized.sh
 
 $ ./Subcortical_Volumes_normalized.sh
+```
 
 // If you use any of these in your research, please don't forget to acknowledge our work.
