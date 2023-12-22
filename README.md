@@ -1,4 +1,4 @@
-# volumetric_analysis 🧠
+# neuroimaging-volumetric 🧠
 Repository on subcortical volume quantification
 
 // It contains two scripts:
