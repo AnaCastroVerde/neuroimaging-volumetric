@@ -1,8 +1,8 @@
 
 ## After subcortical structures volume quantification was performed using
 # a FSL bash script that combines FIRST (segmentation) and fslstats 
-# (quantification), here we do statistical comparisons between ET and CT
-# patients and HC at two timepoints
+# (quantification), here we do statistical comparisons between patients (PAT)
+# and HC at baseline (t0)
 
 
 # Import packages ---------------------------------------------------------
@@ -12,7 +12,7 @@ library("ggpubr")
 library("rstatix")
 library("car")
 
-# Merge csv's of 2 timepoints ---------------------------------------------
+# Merge csv's ------------------------------------------------------------
 
 setwd('/Users/Ana/volumetryfolder')
 Subcortical_V_norm_t0 <- read.csv("Subcortical_Volumes_normalized_t0.csv",
@@ -21,6 +21,10 @@ Subcortical_V_norm_t1 <- read.csv("Subcortical_Volumes_Normalized_t1.csv",
                                   header = TRUE, sep =',')
 Subcortical_V_norm_HC <- read.csv("Subcortical_Volumes_Normalized_HC.csv",
                                   header = TRUE, sep =',')
+
+#Remove these 3 patients because treatment date was some days before baseline
+Subcortical_V_norm_t0 <- Subcortical_V_norm_t0[c(-13,-28,-31),]
+Subcortical_V_norm_t1 <- Subcortical_V_norm_t1[c(-13,-27,-30),]
 
 Subcortical_V_norm <- rbind(Subcortical_V_norm_t0, Subcortical_V_norm_t1,
                             Subcortical_V_norm_HC)
@@ -35,26 +39,63 @@ str(Subcortical_V_norm)
 # Convert variables as factors --------------------------------------------
 
 Subcortical_V_norm$Group <- factor(Subcortical_V_norm$Group, 
-                       levels = c("ET", "CT", "HC"))
+                       levels = c("ET", "CT", "HC"),
+                       labels = c("PAT", "PAT", "HC"))
 Subcortical_V_norm$Time <- factor(Subcortical_V_norm$Time, 
                                    levels = c("t0", "t1"))
 Subcortical_V_norm$Case <- factor(Subcortical_V_norm$Case)
 
-Subcortical_V_norm$Age <- c(rep(c(47, 57, 43, 60, 48, 50, 55, 52, 49, 47,
-                                  53, 53, 48, 67, 60, 55, 69, 57, 60, 50,
-                                  50, 63, 42, 68, 49, 49, 65, 59, 57, 65),2),
-                            rep(c(55,52,48,58,65,47,46,67,63,49,60,47,47,52,
-                                  65,54,49,60,55,58,59,50,68,45,46,58,69),2))
+Subcortical_V_norm$Age <- c(47, 57, 43, 60, 48, 50, 55, 52, 49, 47, 53, 53, 67,
+                            60, 55, 69, 57, 60, 50, 50, 63, 42, 68, 40, 49, 49,
+                            59, 57, 57, 46, 45, 55, 49, 47, 57, 43, 60, 48, 50,
+                            55, 52, 49, 47, 53, 53, 67, 60, 55, 69, 57, 60, 50,
+                            50, 63, 42, 68, 49, 49, 59, 57, 57, 46, 45, 55, 49,
+                            38, 41, 38, 34, 38, 52, 50, 45, 50, 52, 44, 48, 44,
+                            51, 59, 59, 53, 43, 51, 49)
 
 Sienax_volumes <- read.csv("NormalizedBrainVolume.csv",
                            header = TRUE, sep =',')
+Sienax_volumes <- Sienax_volumes[c(-13,-28,-31,-49,-63,-66),]
 
 Subcortical_V_norm$TotalBrainVolume <- Sienax_volumes$Normalized_Brain_Volume
 
-table(Subcortical_V_norm$Time, Subcortical_V_norm$Group) 
+View(Subcortical_V_norm)
 
+#Frequency tables
+table(Subcortical_V_norm$Time, Subcortical_V_norm$Group)
 
-# Boxplots for age, TBV and subcortical brain volumes ---------------------
+# Proportion method -------------------------------------------------------
+
+Subcortical_V_norm$VLeft_Thalamus_t <- Subcortical_V_norm$VLeft_Thalamus/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VLeft_Caudate_t <- Subcortical_V_norm$VLeft_Caudate/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VLeft_Putamen_t <- Subcortical_V_norm$VLeft_Putamen/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VLeft_Pallidum_t <- Subcortical_V_norm$VLeft_Pallidum/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VLeft_Hippocampus_t <- Subcortical_V_norm$VLeft_Hippocampus/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VLeft_Amygdala_t <- Subcortical_V_norm$VLeft_Amygdala/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VLeft_Accumbens_t <- Subcortical_V_norm$VLeft_Accumbens/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VRight_Thalamus_t <- Subcortical_V_norm$VRight_Thalamus/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VRight_Caudate_t <- Subcortical_V_norm$VRight_Caudate/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VRight_Putamen_t <- Subcortical_V_norm$VRight_Putamen/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VRight_Pallidum_t <- Subcortical_V_norm$VRight_Pallidum/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VRight_Hippocampus_t <- Subcortical_V_norm$VRight_Hippocampus/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VRight_Amygdala_t <- Subcortical_V_norm$VRight_Amygdala/
+  Subcortical_V_norm$TotalBrainVolume
+Subcortical_V_norm$VRight_Accumbens_t <- Subcortical_V_norm$VRight_Accumbens/
+  Subcortical_V_norm$TotalBrainVolume
+
+# Boxplots for age, TBV and subcortical brain volumes --------------------------
 
 age_comparison_bxp <- ggboxplot(Subcortical_V_norm, y="Age",
                                 color="Group", palette = "blues")
@@ -63,122 +104,352 @@ TotalBrainVolume_comparison_bxp <- ggboxplot(Subcortical_V_norm, x="Time",
                                              y="TotalBrainVolume", 
                                              color="Group", palette = "blues")
 
-bxp_L_Thalamus <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Thalamus",
-                 color="Group", palette = "jco")
-bxp_L_Caudate <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Caudate",
-                           color="Group", palette = "jco")
-bxp_L_Putamen <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Putamen",
-                           color="Group", palette = "jco")
-bxp_L_Pallidum <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Pallidum",
-                           color="Group", palette = "jco")
-bxp_L_Hippocampus <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Hippocampus",
-                           color="Group", palette = "jco")
-bxp_L_Amygdala <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Amygdala",
-                               color="Group", palette = "jco")
-bxp_L_Accumbens <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Accumbens",
-                               color="Group", palette = "jco")
-bxp_R_Thalamus <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Thalamus",
-                            color="Group", palette = "jco")
-bxp_R_Caudate <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Caudate",
-                           color="Group", palette = "jco")
-bxp_R_Putamen <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Putamen",
-                           color="Group", palette = "jco")
-bxp_R_Pallidum <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Pallidum",
-                            color="Group", palette = "jco")
-bxp_R_Hippocampus <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Hippocampus",
-                               color="Group", palette = "jco")
-bxp_R_Amygdala <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Amygdala",
-                            color="Group", palette = "jco")
-bxp_R_Accumbens <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Accumbens",
-                             color="Group", palette = "jco")
-bxp_Brainstem <- ggboxplot(Subcortical_V_norm, x="Time", y="VBrainstem",
-                               color="Group", palette = "jco")
+Subcortical_V_norm_baseline <- Subcortical_V_norm[Subcortical_V_norm$Time=="t0",]
+#Show a random data sample
+dplyr::sample_n(Subcortical_V_norm_baseline, 10)
+Subcortical_V_norm_6months <- Subcortical_V_norm[Subcortical_V_norm$Time=="t1",]
+#Re-order levels
+Subcortical_V_norm_baseline <- Subcortical_V_norm_baseline %>% 
+  reorder_levels(Group, order =c("HC", "PAT"))
+levels(Subcortical_V_norm_baseline$Group)
 
-# ANOVA considering time and treatment ------------------------------------
-# Two-way ANOVA for unbalanced designs 
-# using the recommended method of Type-III sum of squares 
-# Hypothesis: 
-# H0: There is no difference in the means of factor Treatment Group 
-#(between-subjects)
-# H1: There is no difference in the means of factor Time 
-#(within-subjects)
-# H2: There is no interaction between factors Treatment Group and Time
+a <- ggboxplot(Subcortical_V_norm, x="Group", y="VRight_Thalamus_t",
+               color="Group",palette = "jco",
+               order = c("HC", "PAT"),ylab = "R Thalamus Volume", )
 
-myanova_L_Thalamus <- aov(VLeft_Thalamus ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm) 
-Anova(myanova_L_Thalamus, type = "III")
-tukey.test1 <- tukey_hsd(aov(VLeft_Thalamus ~ Group * Time, data = Subcortical_V_norm))
-tukey.test1$p.adj.fdr <-p.adjust(tukey.test1$p.adj,method = "fdr")
-tukey.test1
+b <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VRight_Caudate_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "R Caudate Volume")
 
-myanova_L_Caudate <- aov(VLeft_Caudate ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_L_Caudate, type = "III")
+c <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VRight_Putamen_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "R Putamen Volume")
 
-myanova_L_Putamen <- aov(VLeft_Putamen ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_L_Putamen, type = "III")
-tukey.test2 <- tukey_hsd(aov(VLeft_Putamen ~ Group * Time, data = Subcortical_V_norm))
-tukey.test2$p.adj.fdr <-p.adjust(tukey.test2$p.adj,method = "fdr")
-tukey.test2
+d <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VRight_Pallidum_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "R Pallidum Volume")
 
-myanova_L_Pallidum <- aov(VLeft_Pallidum ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_L_Pallidum, type = "III")
+e <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VRight_Amygdala_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "R Amygdala Volume")
 
-myanova_L_Hippocampus <- aov(VLeft_Hippocampus ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_L_Hippocampus, type = "III")
+f <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VRight_Hippocampus_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "R Hippocampus Volume")
 
-myanova_L_Amygdala <- aov(VLeft_Amygdala ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_L_Amygdala, type = "III")
+g <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VRight_Accumbens_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "R Accumbens Volume")
 
-myanova_L_Accumbens <- aov(VLeft_Accumbens ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_L_Accumbens, type = "III")
-tukey.test3 <- tukey_hsd(aov(VLeft_Accumbens ~ Group * Time, data = Subcortical_V_norm))
-tukey.test3$p.adj.fdr <-p.adjust(tukey.test3$p.adj,method = "fdr")
-tukey.test3
+h <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VLeft_Thalamus_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "L Thalamus Volume")
 
-myanova_R_Thalamus <- aov(VRight_Thalamus ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_R_Thalamus, type = "III")
-tukey.test4 <- tukey_hsd(aov(VRight_Thalamus ~ Group * Time, data = Subcortical_V_norm))
-tukey.test4$p.adj.fdr <-p.adjust(tukey.test4$p.adj,method = "fdr")
-tukey.test4
+i <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VLeft_Caudate_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "L Caudate Volume")
 
-myanova_R_Caudate <- aov(VRight_Caudate ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm) 
-Anova(myanova_R_Caudate, type = "III")
+j <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VLeft_Putamen_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "L Putamen Volume")
 
-myanova_R_Putamen <- aov(VRight_Putamen ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_R_Putamen, type = "III")
-tukey.test5 <- tukey_hsd(aov(VRight_Putamen ~ Group * Time, data = Subcortical_V_norm))
-tukey.test5$p.adj.fdr <-p.adjust(tukey.test5$p.adj,method = "fdr")
-tukey.test5
+k <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VLeft_Pallidum_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "L Pallidum Volume")
 
-myanova_R_Pallidum <- aov(VRight_Pallidum ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_R_Pallidum, type = "III")
-tukey.test6 <- tukey_hsd(aov(VRight_Pallidum ~ Group * Time, data = Subcortical_V_norm))
-tukey.test6$p.adj.fdr <-p.adjust(tukey.test6$p.adj,method = "fdr")
-tukey.test6
+l <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VLeft_Amygdala_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "L Amygdala Volume")
 
-myanova_R_Hippocampus <- aov(VRight_Hippocampus ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_R_Hippocampus, type = "III")
+m <- ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VLeft_Hippocampus_t",
+               color="Group", palette = "jco",
+               order = c("HC", "PAT"), ylab = "L Hippocampus Volume")
 
-myanova_R_Amygdala <- aov(VRight_Amygdala ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_R_Amygdala, type = "III")
+n <-  ggboxplot(Subcortical_V_norm_baseline, x="Group", y="VLeft_Accumbens_t",
+                color="Group", palette = "jco",
+                order = c("HC", "PAT"), ylab = "L Accumbens Volume")
 
-myanova_R_Accumbens <- aov(VRight_Accumbens ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_R_Accumbens, type = "III")
-tukey.test7 <- tukey_hsd(aov(VRight_Accumbens ~ Group * Time, data = Subcortical_V_norm))
-tukey.test7$p.adj.fdr <-p.adjust(tukey.test7$p.adj,method = "fdr")
-tukey.test7
+ggarrange(a, b, c, d, e, f, g, ncol = 3, nrow = 3)
+ggarrange(h, i, j, k, l, m, n, ncol = 3, nrow = 3)
 
-myanova_Brainstem <- aov(VBrainstem ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-Anova(myanova_Brainstem, type = "III")
-tukey.test8 <- tukey_hsd(aov(VBrainstem ~ Group * Time, data = Subcortical_V_norm))
-tukey.test8$p.adj.fdr <-p.adjust(tukey.test8$p.adj,method = "fdr")
-tukey.test8
+## Unpaired t-tests ------------------------------------------------------------
 
-# Testing ANOVA assumptions -----------------------------------------------
-#Homogeneity of variances if no evidence of relationships between residuals and fitted values
-plot(myanova_L_Thalamus, 1)
-leveneTest(VLeft_Thalamus ~ Group * Time + TotalBrainVolume, data = Subcortical_V_norm)
-# Normality if the normal probability plot of residuals follow a straight line
-plot(myanova_L_Thalamus, 2)
-aov_residuals <- residuals(object = myanova_L_Thalamus)
-shapiro.test(aov_residuals)
-# Repeat for the other subcortical structures
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Thalamus_t)) # p > 0.05, so we can assume normality
+var.test(Subcortical_V_norm_baseline$VRight_Thalamus_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VRight_Thalamus_t[Subcortical_V_norm_baseline$Group == "PAT"]) # p > 0.05, so variances are equal
+t_test_VRight_Thalamus <- t.test(VRight_Thalamus_t ~ Group, data = Subcortical_V_norm_baseline)
+t_test_VRight_Thalamus$p.value <- p.adjust(t_test_VRight_Thalamus$p.value, method = "fdr")
+t_test_VRight_Thalamus$p.value
+t_test_VRight_Thalamus$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Caudate_t)) 
+var.test(Subcortical_V_norm_baseline$VRight_Caudate_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VRight_Caudate_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VRight_Caudate <- t.test(VRight_Caudate_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VRight_Caudate$p.value <- p.adjust(t_test_VRight_Caudate$p.value, method = "fdr")
+t_test_VRight_Caudate$p.value
+t_test_VRight_Caudate$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Putamen_t)) 
+var.test(Subcortical_V_norm_baseline$VRight_Putamen_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VRight_Putamen_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VRight_Putamen <- t.test(VRight_Putamen_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VRight_Putamen$p.value <- p.adjust(t_test_VRight_Putamen$p.value, method = "fdr")
+t_test_VRight_Putamen$p.value
+t_test_VRight_Putamen$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Pallidum_t)) 
+var.test(Subcortical_V_norm_baseline$VRight_Pallidum_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VRight_Pallidum_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VRight_Pallidum <- t.test(VRight_Pallidum_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VRight_Pallidum$p.value <- p.adjust(t_test_VRight_Pallidum$p.value, method = "fdr")
+t_test_VRight_Pallidum$p.value
+t_test_VRight_Pallidum$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Amygdala_t)) 
+var.test(Subcortical_V_norm_baseline$VRight_Amygdala_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VRight_Amygdala_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VRight_Amygdala <- t.test(VRight_Amygdala_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VRight_Amygdala$p.value <- p.adjust(t_test_VRight_Amygdala$p.value, method = "fdr")
+t_test_VRight_Amygdala$p.value
+t_test_VRight_Amygdala$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Hippocampus_t)) 
+var.test(Subcortical_V_norm_baseline$VRight_Hippocampus_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VRight_Hippocampus_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VRight_Hippocampus <- t.test(VRight_Hippocampus_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VRight_Hippocampus$p.value <- p.adjust(t_test_VRight_Hippocampus$p.value, method = "fdr")
+t_test_VRight_Hippocampus$p.value
+t_test_VRight_Hippocampus$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Accumbens_t)) 
+var.test(Subcortical_V_norm_baseline$VRight_Accumbens_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VRight_Accumbens_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VRight_Accumbens <- t.test(VRight_Accumbens_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VRight_Accumbens$p.value <- p.adjust(t_test_VRight_Accumbens$p.value, method = "fdr")
+t_test_VRight_Accumbens$p.value
+t_test_VRight_Accumbens$statistic
+
+# Left side --------------------------------------------------------------------
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Thalamus_t)) # p > 0.05, so we can assume normality
+var.test(Subcortical_V_norm_baseline$VLeft_Thalamus_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VLeft_Thalamus_t[Subcortical_V_norm_baseline$Group == "PAT"]) # p > 0.05, so variances are equal
+t_test_VLeft_Thalamus <- t.test(VLeft_Thalamus_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VLeft_Thalamus$p.value <- p.adjust(t_test_VLeft_Thalamus$p.value, method = "fdr")
+t_test_VLeft_Thalamus$p.value
+t_test_VLeft_Thalamus$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Caudate_t)) 
+var.test(Subcortical_V_norm_baseline$VLeft_Caudate_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VLeft_Caudate_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VLeft_Caudate <- t.test(VLeft_Caudate_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VLeft_Caudate$p.value <- p.adjust(t_test_VLeft_Caudate$p.value, method = "fdr")
+t_test_VLeft_Caudate$p.value
+t_test_VLeft_Caudate$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Putamen_t)) 
+var.test(Subcortical_V_norm_baseline$VLeft_Putamen_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VLeft_Putamen_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VLeft_Putamen <- t.test(VLeft_Putamen_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VLeft_Putamen$p.value <- p.adjust(t_test_VLeft_Putamen$p.value, method = "fdr")
+t_test_VLeft_Putamen$p.value
+t_test_VLeft_Putamen$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Pallidum_t)) 
+var.test(Subcortical_V_norm_baseline$VLeft_Pallidum_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VLeft_Pallidum_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VLeft_Pallidum <- t.test(VLeft_Pallidum_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VLeft_Pallidum$p.value <- p.adjust(t_test_VLeft_Pallidum$p.value, method = "fdr")
+t_test_VLeft_Pallidum$p.value
+t_test_VLeft_Pallidum$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Amygdala_t)) 
+var.test(Subcortical_V_norm_baseline$VLeft_Amygdala_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VLeft_Amygdala_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VLeft_Amygdala <- t.test(VLeft_Amygdala_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VLeft_Amygdala$p.value <- p.adjust(t_test_VLeft_Amygdala$p.value, method = "fdr")
+t_test_VLeft_Amygdala$p.value
+t_test_VLeft_Amygdala$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Hippocampus_t)) 
+var.test(Subcortical_V_norm_baseline$VLeft_Hippocampus_t[Subcortical_V_norm_baseline$Group == "HC"], Subcortical_V_norm_baseline$VLeft_Hippocampus_t[Subcortical_V_norm_baseline$Group == "PAT"]) 
+t_test_VLeft_Hippocampus <- t.test(VLeft_Hippocampus_t ~ Group,  data = Subcortical_V_norm_baseline)
+t_test_VLeft_Hippocampus$p.value <- p.adjust(t_test_VLeft_Hippocampus$p.value, method = "fdr")
+t_test_VLeft_Hippocampus$p.value
+t_test_VLeft_Hippocampus$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Accumbens_t)) # p < 0.05, so we cannot assume normality - let's do the Wilcoxon test
+wilcox_test_VLeft_Accumbens <- wilcox.test(VLeft_Accumbens_t ~ Group,  data = Subcortical_V_norm_baseline)
+wilcox_test_VLeft_Accumbens$p.value <- p.adjust(wilcox_test_VLeft_Accumbens$p.value, method = "fdr")
+wilcox_test_VLeft_Accumbens$p.value
+wilcox_test_VLeft_Accumbens$statistic
+
+
+# ## After subcortical structures volume quantification was performed using
+# a FSL bash script that combines FIRST (segmentation) and fslstats 
+# (quantification), here we do statistical comparisons between patients (PAT)
+# at baseline (t0) and 6 months after treatment (t1)
+
+# Boxplots for subcortical brain volumes ---------------------------------------
+
+a <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Thalamus_t",
+               color="Time",palette = "jco", ylab = "R Thalamus Volume")  #c("#00AFBB","#E7B800","#FC4E07")
+
+b <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Caudate_t",
+               color="Time", palette = "jco",
+               ylab = "R Caudate Volume")
+
+c <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Putamen_t",
+               color="Time", palette = "jco",
+               ylab = "R Putamen Volume")
+
+d <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Pallidum_t",
+               color="Time", palette = "jco",
+               ylab = "R Pallidum Volume")
+
+e <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Amygdala_t",
+               color="Time", palette = "jco",
+               ylab = "R Amygdala Volume")
+
+f <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Hippocampus_t",
+               color="Time", palette = "jco",
+               ylab = "R Hippocampus Volume")
+
+g <- ggboxplot(Subcortical_V_norm, x="Time", y="VRight_Accumbens_t",
+               color="Time", palette = "jco",
+               ylab = "R Accumbens Volume")
+
+h <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Thalamus_t",
+               color="Time", palette = "jco",
+               ylab = "L Thalamus Volume")  #c("#00AFBB","#E7B800","#FC4E07")
+
+i <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Caudate_t",
+               color="Time", palette = "jco",
+               ylab = "L Caudate Volume")
+
+j <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Putamen_t",
+               color="Time", palette = "jco",
+               ylab = "L Putamen Volume")
+
+k <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Pallidum_t",
+               color="Time", palette = "jco",
+               ylab = "L Pallidum Volume")
+
+l <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Amygdala_t",
+               color="Time", palette = "jco",
+               ylab = "L Amygdala Volume")
+
+m <- ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Hippocampus_t",
+               color="Time", palette = "jco",
+               ylab = "L Hippocampus Volume")
+
+n <-  ggboxplot(Subcortical_V_norm, x="Time", y="VLeft_Accumbens_t",
+                color="Time", palette = "jco",
+                ylab = "L Accumbens Volume")
+
+ggarrange(a, b, c, d, e, f, g, ncol = 3, nrow = 3)
+ggarrange(h, i, j, k, l, m, n, ncol = 3, nrow = 3)
+
+Subcortical_V_norm_baseline <- Subcortical_V_norm_baseline[-24,]
+
+## Paired t-tests --------------------------------------------------------------
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Thalamus_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VRight_Thalamus_t))
+var.test(Subcortical_V_norm_baseline$VRight_Thalamus_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Thalamus_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VRight_Thalamus_long <- t.test(Subcortical_V_norm_baseline$VRight_Thalamus_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Thalamus_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VRight_Thalamus_long$p.value <- p.adjust(t_test_VRight_Thalamus_long$p.value, method = "fdr")
+t_test_VRight_Thalamus_long$p.value
+t_test_VRight_Thalamus_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Caudate_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VRight_Caudate_t))
+var.test(Subcortical_V_norm_baseline$VRight_Caudate_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Caudate_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VRight_Caudate_long <- t.test(Subcortical_V_norm_baseline$VRight_Caudate_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Caudate_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VRight_Caudate_long$p.value <- p.adjust(t_test_VRight_Caudate_long$p.value, method = "fdr")
+t_test_VRight_Caudate_long$p.value
+t_test_VRight_Caudate_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Putamen_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VRight_Putamen_t))
+wilcox_test_VRight_Putamen_long <- wilcox.test(Subcortical_V_norm_baseline$VRight_Putamen_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Putamen_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+wilcox_test_VRight_Putamen_long$p.value <- p.adjust(wilcox_test_VRight_Putamen_long$p.value, method = "fdr")
+wilcox_test_VRight_Putamen_long$p.value
+wilcox_test_VRight_Putamen_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Pallidum_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VRight_Pallidum_t))
+var.test(Subcortical_V_norm_baseline$VRight_Pallidum_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Pallidum_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VRight_Pallidum_long <- t.test(Subcortical_V_norm_baseline$VRight_Pallidum_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Pallidum_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VRight_Pallidum_long$p.value <- p.adjust(t_test_VRight_Pallidum_long$p.value, method = "fdr")
+t_test_VRight_Pallidum_long$p.value
+t_test_VRight_Pallidum_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Amygdala_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VRight_Amygdala_t))
+var.test(Subcortical_V_norm_baseline$VRight_Amygdala_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Amygdala_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VRight_Amygdala_long <- t.test(Subcortical_V_norm_baseline$VRight_Amygdala_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Amygdala_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VRight_Amygdala_long$p.value <- p.adjust(t_test_VRight_Amygdala_long$p.value, method = "fdr")
+t_test_VRight_Amygdala_long$p.value
+t_test_VRight_Amygdala_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Hippocampus_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VRight_Hippocampus_t))
+var.test(Subcortical_V_norm_baseline$VRight_Hippocampus_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Hippocampus_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VRight_Hippocampus_long <- t.test(Subcortical_V_norm_baseline$VRight_Hippocampus_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Hippocampus_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VRight_Hippocampus_long$p.value <- p.adjust(t_test_VRight_Hippocampus_long$p.value, method = "fdr")
+t_test_VRight_Hippocampus_long$p.value
+t_test_VRight_Hippocampus_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VRight_Accumbens_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VRight_Accumbens_t))
+var.test(Subcortical_V_norm_baseline$VRight_Accumbens_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Accumbens_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VRight_Accumbens_long <- t.test(Subcortical_V_norm_baseline$VRight_Accumbens_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VRight_Accumbens_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VRight_Accumbens_long$p.value <- p.adjust(t_test_VRight_Accumbens_long$p.value, method = "fdr")
+t_test_VRight_Accumbens_long$p.value
+t_test_VRight_Accumbens_long$statistic
+
+# Left side --------------------------------------------------------------------
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Thalamus_t))
+with(Subcortical_V_norm_6months, shapiro.test(VLeft_Thalamus_t))
+var.test(Subcortical_V_norm_baseline$VLeft_Thalamus_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Thalamus_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+wilcox_test_VLeft_Thalamus_long <- wilcox.test(Subcortical_V_norm_baseline$VLeft_Thalamus_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Thalamus_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+wilcox_test_VLeft_Thalamus_long$p.value <- p.adjust(wilcox_test_VLeft_Thalamus_long$p.value, method = "fdr")
+wilcox_test_VLeft_Thalamus_long$p.value
+wilcox_test_VLeft_Thalamus_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Caudate_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VLeft_Caudate_t))
+var.test(Subcortical_V_norm_baseline$VLeft_Caudate_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Caudate_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VLeft_Caudate_long <- t.test(Subcortical_V_norm_baseline$VLeft_Caudate_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Caudate_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VLeft_Caudate_long$p.value <- p.adjust(t_test_VLeft_Caudate_long$p.value, method = "fdr")
+t_test_VLeft_Caudate_long$p.value
+t_test_VLeft_Caudate_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Putamen_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VLeft_Putamen_t))
+var.test(Subcortical_V_norm_baseline$VLeft_Putamen_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Putamen_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VLeft_Putamen_long <- t.test(Subcortical_V_norm_baseline$VLeft_Putamen_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Putamen_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VLeft_Putamen_long$p.value <- p.adjust(t_test_VLeft_Putamen_long$p.value, method = "fdr")
+t_test_VLeft_Putamen_long$p.value
+t_test_VLeft_Putamen_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Pallidum_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VLeft_Pallidum_t))
+var.test(Subcortical_V_norm_baseline$VLeft_Pallidum_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Pallidum_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VLeft_Pallidum_long <- t.test(Subcortical_V_norm_baseline$VLeft_Pallidum_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Pallidum_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VLeft_Pallidum_long$p.value <- p.adjust(t_test_VLeft_Pallidum_long$p.value, method = "fdr")
+t_test_VLeft_Pallidum_long$p.value
+t_test_VLeft_Pallidum_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Amygdala_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VLeft_Amygdala_t))
+var.test(Subcortical_V_norm_baseline$VLeft_Amygdala_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Amygdala_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VLeft_Amygdala_long <- t.test(Subcortical_V_norm_baseline$VLeft_Amygdala_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Amygdala_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VLeft_Amygdala_long$p.value <- p.adjust(t_test_VLeft_Amygdala_long$p.value, method = "fdr")
+t_test_VLeft_Amygdala_long$p.value
+t_test_VLeft_Amygdala_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Hippocampus_t)) 
+with(Subcortical_V_norm_6months, shapiro.test(VLeft_Hippocampus_t))
+var.test(Subcortical_V_norm_baseline$VLeft_Hippocampus_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Hippocampus_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+t_test_VLeft_Hippocampus_long <- t.test(Subcortical_V_norm_baseline$VLeft_Hippocampus_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Hippocampus_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+t_test_VLeft_Hippocampus_long$p.value <- p.adjust(t_test_VLeft_Hippocampus_long$p.value, method = "fdr")
+t_test_VLeft_Hippocampus_long$p.value
+t_test_VLeft_Hippocampus_long$statistic
+
+with(Subcortical_V_norm_baseline, shapiro.test(VLeft_Accumbens_t))
+with(Subcortical_V_norm_6months, shapiro.test(VLeft_Accumbens_t))
+var.test(Subcortical_V_norm_baseline$VLeft_Accumbens_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Accumbens_t[Subcortical_V_norm_6months$Group == "PAT"]) 
+wilcox_test_VLeft_Accumbens_long <- wilcox.test(Subcortical_V_norm_baseline$VLeft_Accumbens_t[Subcortical_V_norm_baseline$Group == "PAT"], Subcortical_V_norm_6months$VLeft_Accumbens_t[Subcortical_V_norm_6months$Group == "PAT"], paired = TRUE)
+wilcox_test_VLeft_Accumbens_long$p.value <- p.adjust(wilcox_test_VLeft_Accumbens_long$p.value, method = "fdr")
+wilcox_test_VLeft_Accumbens_long$p.value
+wilcox_test_VLeft_Accumbens_long$statistic
